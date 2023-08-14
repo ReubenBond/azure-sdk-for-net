@@ -29,17 +29,46 @@ namespace Azure.Storage
     /// }
     /// </code>
     /// </summary>
-    internal class DisposableBucket : IDisposable
+    internal struct DisposableBucket : IDisposable
     {
-        private List<IDisposable> Disposables { get; } = new List<IDisposable>();
+        private object _value;
 
-        public void Add(IDisposable disposable) => Disposables.Add(disposable);
+        public void Add(IDisposable disposable)
+        {
+            if (_value is null)
+            {
+                // Zero existing elements
+                _value = disposable;
+            }
+            else if (_value is IDisposable existing)
+            {
+                // One existing element
+                _value = new List<IDisposable>() { existing, disposable };
+            }
+            else
+            {
+                // Multiple existing elements
+                ((List<IDisposable>)_value).Add(disposable);
+            }
+        }
 
         public void Dispose()
         {
-            foreach (IDisposable disposable in Disposables)
+            if (_value is null)
             {
-                disposable.Dispose();
+                return;
+            }
+            else if (_value is IDisposable existing)
+            {
+                existing.Dispose();
+            }
+            else
+            {
+                var disposables = (List<IDisposable>)_value;
+                foreach (IDisposable disposable in disposables)
+                {
+                    disposable.Dispose();
+                }
             }
         }
     }

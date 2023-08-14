@@ -34,7 +34,7 @@ namespace Azure.Storage.Shared
         private IHasher _bufferChecksumer;
 
         private bool _disposed;
-        private readonly DisposableBucket _accumulatedDisposables = new DisposableBucket();
+        private DisposableBucket _accumulatedDisposables = new DisposableBucket();
 
         protected StorageWriteStream(
             long position,
